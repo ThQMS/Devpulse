@@ -1,36 +1,36 @@
 # DevPulse
 
 [![CI](https://github.com/ThQMS/Devpulse/actions/workflows/ci.yml/badge.svg)](https://github.com/ThQMS/Devpulse/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Licenca: MIT](https://img.shields.io/badge/Licenca-MIT-green.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20.12%2B-339933.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)](https://www.typescriptlang.org/)
 
-Real-time uptime monitoring dashboard for HTTP services and APIs.
+Dashboard de monitoramento em tempo real para servicos HTTP e APIs.
 
-DevPulse checks endpoints on a schedule, stores check history, raises alerts for repeated failures or slow responses, and streams live status updates to a React dashboard over WebSocket.
+O DevPulse executa checks periodicos em endpoints, armazena historico, gera alertas para falhas repetidas ou respostas lentas e envia atualizacoes ao dashboard React por WebSocket.
 
-## Features
+## Funcionalidades
 
-- HTTP service monitoring with configurable interval, timeout and expected status code
-- Live dashboard updates through WebSocket events
-- Uptime and latency charts backed by PostgreSQL history
-- Alerting for consecutive failures and high latency
-- Service silence/resume workflow for maintenance windows
-- Retention cleanup with hourly rollups for older check data
-- Shared API/web TypeScript contracts in `packages/shared`
+- Monitoramento HTTP com intervalo, timeout e status esperado configuraveis
+- Atualizacoes em tempo real via WebSocket
+- Graficos de uptime e latencia com historico em PostgreSQL
+- Alertas para falhas consecutivas e alta latencia
+- Fluxo de silenciar/retomar servicos durante janelas de manutencao
+- Retencao de dados com rollups horarios para checks antigos
+- Contratos TypeScript compartilhados entre API e web em `packages/shared`
 
-## Architecture
+## Arquitetura
 
 ```mermaid
 graph LR
-  Browser[React dashboard]
-  Api[Fastify API]
-  App[Application use cases]
-  Domain[Domain entities and services]
-  Worker[BullMQ worker]
-  Scheduler[Scheduler]
-  Queue[Redis and BullMQ]
-  Repos[Repository ports]
+  Browser[Dashboard React]
+  Api[API Fastify]
+  App[Casos de uso]
+  Domain[Dominio]
+  Worker[Worker BullMQ]
+  Scheduler[Agendador]
+  Queue[Redis e BullMQ]
+  Repos[Portas de repositorio]
   Postgres[PostgreSQL]
   Prober[HTTP prober]
   Broadcaster[WebSocket broadcaster]
@@ -49,17 +49,19 @@ graph LR
   Broadcaster --> Browser
 ```
 
+Fluxo de um health check:
+
 ```mermaid
 graph TD
-  Job[Scheduled check job]
-  Probe[Probe service URL]
-  Save[Save check result]
-  Update[Update service status]
-  Evaluate[Evaluate alert policy]
-  Alert[Persist alert]
-  BroadcastCheck[Broadcast check event]
-  BroadcastAlert[Broadcast alert event]
-  Dashboard[Dashboard store update]
+  Job[Job agendado]
+  Probe[Testa URL do servico]
+  Save[Salva resultado]
+  Update[Atualiza status do servico]
+  Evaluate[Avalia politica de alerta]
+  Alert[Persiste alerta]
+  BroadcastCheck[Envia evento de check]
+  BroadcastAlert[Envia evento de alerta]
+  Dashboard[Atualiza store do dashboard]
 
   Job --> Probe
   Probe --> Save
@@ -72,14 +74,14 @@ graph TD
   BroadcastAlert --> Dashboard
 ```
 
-Backend dependency direction:
+Direcao das dependencias no backend:
 
 ```mermaid
 graph LR
-  Presentation[Presentation layer]
-  Application[Application layer]
-  Domain[Domain layer]
-  Infrastructure[Infrastructure layer]
+  Presentation[Camada de apresentacao]
+  Application[Camada de aplicacao]
+  Domain[Camada de dominio]
+  Infrastructure[Camada de infraestrutura]
 
   Presentation --> Application
   Application --> Domain
@@ -90,21 +92,21 @@ graph LR
 ## Monorepo
 
 ```text
-packages/api      Fastify API, WebSocket gateway and BullMQ worker
-packages/web      React dashboard
-packages/shared   Shared TypeScript DTOs and WebSocket event contracts
-docs/             Architecture and scaling notes
+packages/api      API Fastify, WebSocket gateway e worker BullMQ
+packages/web      Dashboard React
+packages/shared   DTOs e eventos TypeScript compartilhados
+docs/             Notas de arquitetura e escalabilidade
 ```
 
-## Getting Started
+## Comecando
 
-Requirements:
+Requisitos:
 
-- Node.js 20 or newer
+- Node.js 20 ou superior
 - Corepack
-- Docker and Docker Compose
+- Docker e Docker Compose
 
-Install dependencies and start infrastructure:
+Instale as dependencias e suba a infraestrutura:
 
 ```bash
 corepack enable
@@ -113,30 +115,30 @@ cp .env.example .env
 corepack pnpm docker:up
 ```
 
-Run migrations and seed example services:
+Rode as migracoes e crie servicos de exemplo:
 
 ```bash
 corepack pnpm --filter api migrate
 corepack pnpm --filter api seed
 ```
 
-Start the app:
+Inicie a aplicacao:
 
 ```bash
 corepack pnpm dev
 ```
 
-Local URLs:
+URLs locais:
 
 - Web: `http://localhost:5173`
 - API: `http://localhost:3001`
 - Health: `http://localhost:3001/health`
 
-In development, the Vite `/api` and `/ws` proxy injects `API_KEY` server-side. Browser code does not store the API key.
+Em desenvolvimento, o proxy do Vite em `/api` e `/ws` injeta `API_KEY` no lado do servidor. O codigo do navegador nao armazena a chave da API.
 
-## Usage
+## Uso
 
-Create a service directly through the API:
+Criar um servico pela API:
 
 ```bash
 curl -X POST http://localhost:3001/api/v1/services \
@@ -151,30 +153,30 @@ curl -X POST http://localhost:3001/api/v1/services \
   }'
 ```
 
-List services:
+Listar servicos:
 
 ```bash
 curl http://localhost:3001/api/v1/services \
   -H "x-api-key: troque-em-producao"
 ```
 
-Run one check immediately:
+Executar um check imediato:
 
 ```bash
 curl -X POST http://localhost:3001/api/v1/services/<service-id>/check-now \
   -H "x-api-key: troque-em-producao"
 ```
 
-Paginate check history:
+Paginar historico de checks:
 
 ```bash
 curl "http://localhost:3001/api/v1/services/<service-id>/checks?limit=25&offset=0" \
   -H "x-api-key: troque-em-producao"
 ```
 
-## Configuration
+## Configuracao
 
-Copy `.env.example` to `.env` and adjust:
+Copie `.env.example` para `.env` e ajuste:
 
 ```text
 DATABASE_URL=postgresql://devpulse:devpulse@localhost:5432/devpulse
@@ -186,9 +188,9 @@ LOG_LEVEL=info
 RETENTION_DAYS=30
 ```
 
-For production, set a strong `API_KEY` and terminate browser traffic through a reverse proxy or BFF that injects the API key server-side.
+Em producao, use uma `API_KEY` forte e entregue o trafego do navegador por um reverse proxy ou BFF que injete a chave no lado do servidor.
 
-## Tests and Quality
+## Testes e qualidade
 
 ```bash
 corepack pnpm format:check
@@ -197,25 +199,25 @@ corepack pnpm test
 corepack pnpm build
 ```
 
-The CI pipeline runs the same quality gate on every pull request:
+O pipeline de CI roda o mesmo quality gate em todo pull request:
 
-1. Format check
+1. Checagem de formatacao
 2. Lint
-3. Tests
+3. Testes
 4. Build
 
-## Documentation
+## Documentacao
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Scaling](docs/SCALING.md)
-- [Contributing](CONTRIBUTING.md)
-- [Security](SECURITY.md)
+- [Arquitetura](docs/ARCHITECTURE.md)
+- [Escalabilidade](docs/SCALING.md)
+- [Contribuindo](CONTRIBUTING.md)
+- [Seguranca](SECURITY.md)
 - [Changelog](CHANGELOG.md)
 
-## Contributing
+## Contribuindo
 
-Pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR.
+Pull requests sao bem-vindos. Leia [CONTRIBUTING.md](CONTRIBUTING.md) antes de abrir um PR.
 
-## License
+## Licenca
 
-DevPulse is released under the [MIT License](LICENSE).
+DevPulse e distribuido sob a [licenca MIT](LICENSE).
