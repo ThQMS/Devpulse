@@ -22,41 +22,68 @@ DevPulse checks endpoints on a schedule, stores check history, raises alerts for
 ## Architecture
 
 ```mermaid
-flowchart LR
-  Browser[React dashboard] -->|REST /api/v1| API[Fastify API]
-  Browser <-->|WebSocket /ws| API
-  API --> App[Application use cases]
-  Worker[BullMQ worker] --> App
-  Scheduler[Scheduler] --> Queue[(Redis / BullMQ)]
+graph LR
+  Browser[React dashboard]
+  Api[Fastify API]
+  App[Application use cases]
+  Domain[Domain entities and services]
+  Worker[BullMQ worker]
+  Scheduler[Scheduler]
+  Queue[Redis and BullMQ]
+  Repos[Repository ports]
+  Postgres[PostgreSQL]
+  Prober[HTTP prober]
+  Broadcaster[WebSocket broadcaster]
+
+  Browser --> Api
+  Api --> Browser
+  Api --> App
+  Scheduler --> Queue
   Queue --> Worker
-  App --> Domain[Domain entities and services]
-  App --> Repos[Repository ports]
-  Repos --> Postgres[(PostgreSQL)]
-  App --> Prober[HTTP prober]
-  App --> Broadcaster[WebSocket broadcaster]
+  Worker --> App
+  App --> Domain
+  App --> Repos
+  Repos --> Postgres
+  App --> Prober
+  App --> Broadcaster
   Broadcaster --> Browser
 ```
 
 ```mermaid
-flowchart TD
-  Job[Scheduled check job] --> Probe[Probe service URL]
-  Probe --> Save[Save CheckResult]
-  Save --> Update[Update service last-check snapshot]
-  Update --> Evaluate[Evaluate alert policy]
-  Evaluate -->|new alert| Alert[Persist Alert]
-  Evaluate --> Broadcast[Broadcast CHECK_RESULT]
-  Alert --> BroadcastAlert[Broadcast ALERT_CREATED]
-  Broadcast --> Dashboard[Dashboard store update]
+graph TD
+  Job[Scheduled check job]
+  Probe[Probe service URL]
+  Save[Save check result]
+  Update[Update service status]
+  Evaluate[Evaluate alert policy]
+  Alert[Persist alert]
+  BroadcastCheck[Broadcast check event]
+  BroadcastAlert[Broadcast alert event]
+  Dashboard[Dashboard store update]
+
+  Job --> Probe
+  Probe --> Save
+  Save --> Update
+  Update --> Evaluate
+  Evaluate --> Alert
+  Evaluate --> BroadcastCheck
+  Alert --> BroadcastAlert
+  BroadcastCheck --> Dashboard
   BroadcastAlert --> Dashboard
 ```
 
 Backend dependency direction:
 
 ```mermaid
-flowchart LR
-  Presentation[Presentation: Fastify routes and WebSocket] --> Application[Application: use cases and ports]
-  Application --> Domain[Domain: entities, value objects, services]
-  Infrastructure[Infrastructure: PostgreSQL, Redis, BullMQ, Axios] --> Application
+graph LR
+  Presentation[Presentation layer]
+  Application[Application layer]
+  Domain[Domain layer]
+  Infrastructure[Infrastructure layer]
+
+  Presentation --> Application
+  Application --> Domain
+  Infrastructure --> Application
   Infrastructure --> Domain
 ```
 
