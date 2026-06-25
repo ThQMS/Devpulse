@@ -1,0 +1,44 @@
+services:
+  api:
+    build: ./packages/api
+    ports:
+      - '3001:3001'
+    environment:
+      DATABASE_URL: postgresql://devpulse:devpulse@db:5432/devpulse
+      REDIS_URL: redis://redis:6379
+      API_KEY: ${API_KEY:-troque-em-producao}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      PORT: '3001'
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      RETENTION_DAYS: ${RETENTION_DAYS:-30}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: devpulse
+      POSTGRES_PASSWORD: devpulse
+      POSTGRES_DB: devpulse
+    ports:
+      - '5432:5432'
+    volumes:
+      - devpulse_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U devpulse -d devpulse']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    restart: unless-stopped
+
+volumes:
+  devpulse_pgdata:

@@ -1,0 +1,45 @@
+{
+  "name": "devpulse",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Real-time uptime monitoring dashboard for HTTP services and APIs.",
+  "license": "MIT",
+  "author": "Thiago Henrique",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ThQMS/Devpulse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ThQMS/Devpulse/issues"
+  },
+  "homepage": "https://github.com/ThQMS/Devpulse#readme",
+  "engines": {
+    "node": ">=20.12.0"
+  },
+  "scripts": {
+    "dev": "concurrently \"corepack pnpm --filter api dev\" \"corepack pnpm --filter web dev\"",
+    "build": "corepack pnpm --filter @devpulse/shared build && corepack pnpm --filter api build && corepack pnpm --filter web build",
+    "test": "corepack pnpm --filter api test",
+    "lint": "corepack pnpm -r lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "concurrently": "^8.0.0",
+    "eslint": "^9.9.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "globals": "^15.9.0",
+    "prettier": "^3.3.3",
+    "typescript-eslint": "^8.2.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "ioredis": "5.10.1"
+    }
+  },
+  "packageManager": "pnpm@9.0.0"
+}
